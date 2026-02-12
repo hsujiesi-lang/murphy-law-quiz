@@ -595,8 +595,11 @@ wss.on('connection', (ws) => {
       playerCount: players.size,
       leaderboard: getLeaderboard()
     });
-    // Check if remaining players are all finished
-    if (gameState === 'playing') {
+    // If no players left, reset game state to waiting
+    if (players.size === 0) {
+      gameState = 'waiting';
+    } else if (gameState === 'playing') {
+      // Check if remaining players are all finished
       checkAllFinished();
     }
   });
