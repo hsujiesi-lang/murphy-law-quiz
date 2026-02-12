@@ -494,7 +494,9 @@
           waitingSection.style.display = 'block';
           playerCount.textContent = data.playerCount;
           if (data.gameState === 'playing') {
-            // Game already in progress, wait
+            // Game in progress — server will send game_start + question shortly
+            document.querySelector('.waiting-text').textContent = '遊戲進行中，正在加入...';
+            startBtn.style.display = 'none';
           }
           break;
 
@@ -576,6 +578,8 @@
           showScreen(lobby);
           joinSection.style.display = 'none';
           waitingSection.style.display = 'block';
+          startBtn.style.display = '';
+          document.querySelector('.waiting-text').textContent = '等待所有人加入後，按下開始遊戲';
           renderLeaderboard(lobbyLeaderboard, data.leaderboard);
           break;
       }

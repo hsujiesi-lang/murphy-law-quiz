@@ -573,6 +573,13 @@ wss.on('connection', (ws) => {
         playerCount: players.size,
         leaderboard: getLeaderboard()
       });
+
+      // If game is already playing, let this player join mid-game
+      if (gameState === 'playing' && questionOrder.length > 0) {
+        const player = players.get(ws);
+        send(ws, { type: 'game_start', totalQuestions: TOTAL_QUESTIONS });
+        sendQuestionToPlayer(ws, player);
+      }
     }
 
     if (data.type === 'start_game' && gameState === 'waiting') {
