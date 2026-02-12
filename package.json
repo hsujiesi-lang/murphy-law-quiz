@@ -1,0 +1,12 @@
+{
+  "name": "murphy-law-quiz",
+  "version": "1.0.0",
+  "description": "墨菲定律心理學選擇題測驗",
+  "main": "quiz-server.js",
+  "scripts": {
+    "start": "node quiz-server.js"
+  },
+  "dependencies": {
+    "ws": "^8.19.0"
+  }
+}

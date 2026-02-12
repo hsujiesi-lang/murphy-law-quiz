@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>墨菲定律 - 心理學大挑戰</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #1a1a2e;
+      --secondary: #16213e;
+      --accent: #0f3460;
+      --highlight: #e94560;
+      --gold: #ffd700;
+      --green: #00c853;
+      --red: #ff1744;
+      --text: #eee;
+    }
+
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background: var(--primary);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ===== Screens ===== */
+    .screen { display: none; width: 100%; text-align: center; }
+    .screen.active { display: flex; flex-direction: column; align-items: center; }
+
+    /* ===== Lobby ===== */
+    .logo {
+      font-size: 3rem;
+      font-weight: 900;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--highlight), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: none;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: #aaa;
+      margin-bottom: 40px;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 14px 20px;
+      border: 2px solid #333;
+      border-radius: 12px;
+      background: var(--secondary);
+      color: white;
+      font-size: 1.1rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--highlight);
+    }
+
+    .btn {
+      padding: 14px 32px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.3s;
+      color: white;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--highlight), #c0392b);
+    }
+
+    .btn-primary:hover { transform: scale(1.05); box-shadow: 0 8px 25px rgba(233,69,96,0.4); }
+
+    .btn-start {
+      background: linear-gradient(135deg, var(--green), #009624);
+      padding: 16px 48px;
+      font-size: 1.3rem;
+      margin-top: 20px;
+    }
+
+    .btn-start:hover { transform: scale(1.05); box-shadow: 0 8px 25px rgba(0,200,83,0.4); }
+
+    .player-count {
+      font-size: 1.2rem;
+      margin: 15px 0;
+      color: #ccc;
+    }
+
+    .player-count span { color: var(--gold); font-weight: 700; font-size: 1.5rem; }
+
+    .waiting-text {
+      color: #888;
+      font-size: 0.95rem;
+      margin-top: 10px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    /* ===== Game Screen ===== */
+    .game-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .question-num {
+      font-size: 0.95rem;
+      color: #aaa;
+    }
+
+    .score-display {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    .timer-bar-container {
+      width: 100%;
+      height: 8px;
+      background: #333;
+      border-radius: 4px;
+      margin-bottom: 30px;
+      overflow: hidden;
+    }
+
+    .timer-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), var(--highlight));
+      border-radius: 4px;
+      transition: width 1s linear;
+    }
+
+    .timer-bar.urgent {
+      background: linear-gradient(90deg, var(--red), #ff6d00);
+    }
+
+    .timer-text {
+      font-size: 3rem;
+      font-weight: 900;
+      margin-bottom: 15px;
+      transition: color 0.3s;
+    }
+
+    .timer-text.urgent { color: var(--red); }
+
+    .question-text {
+      font-size: 1.35rem;
+      font-weight: 500;
+      line-height: 1.8;
+      margin-bottom: 30px;
+      padding: 0 10px;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      width: 100%;
+    }
+
+    .option-btn {
+      padding: 20px 16px;
+      border: 3px solid transparent;
+      border-radius: 16px;
+      font-size: 1.05rem;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.25s;
+      color: white;
+      line-height: 1.5;
+      text-align: center;
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .option-btn:nth-child(1) { background: #e74c3c; }
+    .option-btn:nth-child(2) { background: #2980b9; }
+    .option-btn:nth-child(3) { background: #f39c12; }
+    .option-btn:nth-child(4) { background: #27ae60; }
+
+    .option-btn:hover:not(.disabled) {
+      transform: scale(1.03);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+
+    .option-btn.selected {
+      border-color: white;
+      transform: scale(1.03);
+      box-shadow: 0 0 20px rgba(255,255,255,0.3);
+    }
+
+    .option-btn.disabled { opacity: 0.6; cursor: default; pointer-events: none; }
+    .option-btn.correct-answer { border-color: var(--gold); box-shadow: 0 0 25px rgba(255,215,0,0.5); opacity: 1 !important; }
+    .option-btn.wrong-answer { border-color: #666; opacity: 0.4 !important; }
+
+    .feedback {
+      margin-top: 20px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      min-height: 40px;
+    }
+
+    .feedback.correct { color: var(--green); }
+    .feedback.wrong { color: var(--red); }
+
+    .explanation {
+      margin-top: 12px;
+      padding: 16px 20px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 12px;
+      font-size: 1rem;
+      line-height: 1.7;
+      color: #ddd;
+      text-align: left;
+      display: none;
+      width: 100%;
+    }
+
+    .explanation.visible {
+      display: block;
+      animation: slideIn 0.4s ease-out;
+    }
+
+    /* ===== Leaderboard ===== */
+    .leaderboard {
+      width: 100%;
+      max-width: 500px;
+      margin-top: 20px;
+    }
+
+    .leaderboard h3 {
+      font-size: 1.3rem;
+      margin-bottom: 15px;
+      color: var(--gold);
+    }
+
+    .lb-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      background: var(--secondary);
+      border-radius: 12px;
+      margin-bottom: 8px;
+      transition: all 0.3s;
+    }
+
+    .lb-item.top1 { background: linear-gradient(135deg, #ffd70033, #ff8f0033); border: 2px solid var(--gold); }
+    .lb-item.top2 { background: linear-gradient(135deg, #c0c0c033, #a0a0a033); border: 2px solid #c0c0c0; }
+    .lb-item.top3 { background: linear-gradient(135deg, #cd7f3233, #8b451333); border: 2px solid #cd7f32; }
+
+    .lb-rank {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 1.1rem;
+      border-radius: 50%;
+      margin-right: 14px;
+      background: #333;
+    }
+
+    .lb-item.top1 .lb-rank { background: var(--gold); color: #333; }
+    .lb-item.top2 .lb-rank { background: #c0c0c0; color: #333; }
+    .lb-item.top3 .lb-rank { background: #cd7f32; color: #fff; }
+
+    .lb-name {
+      flex: 1;
+      font-weight: 500;
+      text-align: left;
+    }
+
+    .lb-score {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--gold);
+    }
+
+    .lb-item.me {
+      box-shadow: 0 0 15px rgba(233, 69, 96, 0.3);
+      border: 2px solid var(--highlight);
+    }
+
+    /* ===== Result Screen ===== */
+    .result-title {
+      font-size: 2.5rem;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .result-subtitle {
+      font-size: 1.1rem;
+      color: #aaa;
+      margin-bottom: 30px;
+    }
+
+    .crown { font-size: 4rem; margin-bottom: 10px; }
+
+    .final-score {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 20px;
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 600px) {
+      .logo { font-size: 2.2rem; }
+      .options-grid { grid-template-columns: 1fr; }
+      .question-text { font-size: 1.15rem; }
+      .timer-text { font-size: 2.5rem; }
+      .option-btn { min-height: 60px; padding: 16px 14px; }
+    }
+
+    /* ===== Animations ===== */
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-in { animation: slideIn 0.4s ease-out; }
+
+    @keyframes bounceIn {
+      0% { transform: scale(0.5); opacity: 0; }
+      60% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .bounce-in { animation: bounceIn 0.5s ease-out; }
+
+    @keyframes confetti {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-200px) rotate(720deg); opacity: 0; }
+    }
+
+    .points-popup {
+      position: fixed;
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--gold);
+      pointer-events: none;
+      animation: confetti 1.5s ease-out forwards;
+      z-index: 100;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Lobby Screen -->
+    <div id="lobby" class="screen active">
+      <div class="logo">墨菲定律</div>
+      <div class="subtitle">心理學大挑戰</div>
+
+      <div id="join-section">
+        <div class="input-group">
+          <input type="text" id="nameInput" placeholder="輸入你的暱稱" maxlength="20">
+          <button class="btn btn-primary" id="joinBtn">加入</button>
+        </div>
+      </div>
+
+      <div id="waiting-section" style="display:none;">
+        <div class="player-count">目前人數：<span id="playerCount">0</span> 人</div>
+        <div class="leaderboard" id="lobbyLeaderboard"></div>
+        <button class="btn btn-start" id="startBtn">開始遊戲</button>
+        <div class="waiting-text">等待所有人加入後，按下開始遊戲</div>
+      </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game" class="screen">
+      <div class="game-header">
+        <div class="question-num" id="questionNum">第 1/15 題</div>
+        <div class="score-display">分數：<span id="myScore">0</span></div>
+      </div>
+      <div class="timer-bar-container">
+        <div class="timer-bar" id="timerBar"></div>
+      </div>
+      <div class="timer-text" id="timerText">20</div>
+      <div class="question-text animate-in" id="questionText"></div>
+      <div class="options-grid" id="optionsGrid"></div>
+      <div class="feedback" id="feedback"></div>
+      <div class="explanation" id="explanation"></div>
+    </div>
+
+    <!-- Result Screen -->
+    <div id="result" class="screen">
+      <div class="result-title" id="resultTitle">遊戲結束</div>
+      <div class="result-subtitle">最終排名</div>
+      <div class="leaderboard" id="finalLeaderboard"></div>
+      <div class="waiting-text" style="margin-top:20px;">即將返回大廳...</div>
+    </div>
+  </div>
+
+  <script>
+    const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const ws = new WebSocket(`${wsProtocol}//${location.host}`);
+    let myName = '';
+    let myScore = 0;
+    let answered = false;
+    let currentOptions = [];
+
+    // Elements
+    const lobby = document.getElementById('lobby');
+    const game = document.getElementById('game');
+    const result = document.getElementById('result');
+    const joinSection = document.getElementById('join-section');
+    const waitingSection = document.getElementById('waiting-section');
+    const nameInput = document.getElementById('nameInput');
+    const joinBtn = document.getElementById('joinBtn');
+    const startBtn = document.getElementById('startBtn');
+    const playerCount = document.getElementById('playerCount');
+    const questionNum = document.getElementById('questionNum');
+    const myScoreEl = document.getElementById('myScore');
+    const timerBar = document.getElementById('timerBar');
+    const timerText = document.getElementById('timerText');
+    const questionText = document.getElementById('questionText');
+    const optionsGrid = document.getElementById('optionsGrid');
+    const feedback = document.getElementById('feedback');
+    const explanation = document.getElementById('explanation');
+    const lobbyLeaderboard = document.getElementById('lobbyLeaderboard');
+    const finalLeaderboard = document.getElementById('finalLeaderboard');
+
+    function showScreen(screen) {
+      [lobby, game, result].forEach(s => s.classList.remove('active'));
+      screen.classList.add('active');
+    }
+
+    // Join
+    joinBtn.addEventListener('click', join);
+    nameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') join(); });
+
+    function join() {
+      const name = nameInput.value.trim();
+      if (!name) { nameInput.focus(); return; }
+      myName = name;
+      ws.send(JSON.stringify({ type: 'join', name }));
+    }
+
+    // Start game
+    startBtn.addEventListener('click', () => {
+      ws.send(JSON.stringify({ type: 'start_game' }));
+    });
+
+    // Handle messages
+    ws.onmessage = (e) => {
+      const data = JSON.parse(e.data);
+
+      switch (data.type) {
+        case 'joined':
+          joinSection.style.display = 'none';
+          waitingSection.style.display = 'block';
+          playerCount.textContent = data.playerCount;
+          if (data.gameState === 'playing') {
+            // Game already in progress, wait
+          }
+          break;
+
+        case 'player_update':
+          playerCount.textContent = data.playerCount;
+          renderLeaderboard(lobbyLeaderboard, data.leaderboard);
+          break;
+
+        case 'game_start':
+          myScore = 0;
+          myScoreEl.textContent = '0';
+          showScreen(game);
+          break;
+
+        case 'question':
+          answered = false;
+          feedback.textContent = '';
+          feedback.className = 'feedback';
+          explanation.textContent = '';
+          explanation.className = 'explanation';
+          questionNum.textContent = `第 ${data.index}/${data.total} 題`;
+          questionText.textContent = data.question;
+          questionText.className = 'question-text animate-in';
+          timerBar.style.width = '100%';
+          timerBar.classList.remove('urgent');
+          timerText.textContent = data.timeLimit;
+          timerText.classList.remove('urgent');
+          currentOptions = data.options;
+          renderOptions(data.options);
+          break;
+
+        case 'tick':
+          timerText.textContent = data.timeLeft;
+          const pct = (data.timeLeft / 20) * 100;
+          timerBar.style.width = pct + '%';
+          if (data.timeLeft <= 5) {
+            timerBar.classList.add('urgent');
+            timerText.classList.add('urgent');
+          }
+          break;
+
+        case 'answer_feedback':
+          if (data.correct) {
+            feedback.textContent = `正確！ +${data.points} 分`;
+            feedback.className = 'feedback correct bounce-in';
+            showPointsPopup(data.points);
+          } else {
+            feedback.textContent = data.timeUp ? '時間到！' : '答錯了！';
+            feedback.className = 'feedback wrong bounce-in';
+          }
+          myScore = data.score;
+          myScoreEl.textContent = myScore;
+          showCorrectAnswer(data.correctAnswer);
+          explanation.textContent = data.explanation;
+          explanation.className = 'explanation visible';
+          break;
+
+        case 'leaderboard_update':
+          // Real-time leaderboard updates during game (no screen change)
+          break;
+
+        case 'player_finished':
+          myScore = data.score;
+          myScoreEl.textContent = myScore;
+          showScreen(result);
+          document.getElementById('resultTitle').textContent = '作答完畢！';
+          document.querySelector('.result-subtitle').textContent = '等待其他玩家完成...';
+          renderLeaderboard(finalLeaderboard, data.leaderboard, true);
+          break;
+
+        case 'game_over':
+          showScreen(result);
+          document.getElementById('resultTitle').textContent = '遊戲結束';
+          document.querySelector('.result-subtitle').textContent = '最終排名';
+          renderLeaderboard(finalLeaderboard, data.leaderboard, true);
+          break;
+
+        case 'back_to_lobby':
+          showScreen(lobby);
+          joinSection.style.display = 'none';
+          waitingSection.style.display = 'block';
+          renderLeaderboard(lobbyLeaderboard, data.leaderboard);
+          break;
+      }
+    };
+
+    const optionLabels = ['A', 'B', 'C', 'D'];
+
+    function renderOptions(options) {
+      optionsGrid.innerHTML = '';
+      options.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn animate-in';
+        btn.style.animationDelay = (i * 0.1) + 's';
+        btn.textContent = `${optionLabels[i]}. ${opt}`;
+        btn.addEventListener('click', () => selectAnswer(i, btn));
+        optionsGrid.appendChild(btn);
+      });
+    }
+
+    function selectAnswer(index, btn) {
+      if (answered) return;
+      answered = true;
+
+      // Disable all
+      document.querySelectorAll('.option-btn').forEach(b => b.classList.add('disabled'));
+      btn.classList.add('selected');
+      btn.classList.remove('disabled');
+
+      ws.send(JSON.stringify({ type: 'answer', answer: index }));
+    }
+
+    function showCorrectAnswer(correctIdx) {
+      const buttons = document.querySelectorAll('.option-btn');
+      buttons.forEach((btn, i) => {
+        btn.classList.add('disabled');
+        if (i === correctIdx) {
+          btn.classList.add('correct-answer');
+          btn.classList.remove('disabled');
+        } else {
+          btn.classList.add('wrong-answer');
+        }
+      });
+    }
+
+    function renderLeaderboard(container, leaderboard, isFinal = false) {
+      if (!leaderboard || leaderboard.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+
+      let html = `<h3>${isFinal ? '最終排名' : '排行榜'}</h3>`;
+      leaderboard.forEach((p, i) => {
+        const rank = i + 1;
+        const topClass = rank === 1 ? 'top1' : rank === 2 ? 'top2' : rank === 3 ? 'top3' : '';
+        const meClass = p.name === myName ? 'me' : '';
+        const medal = rank === 1 ? '&#x1f3c6;' : rank === 2 ? '&#x1f948;' : rank === 3 ? '&#x1f949;' : rank;
+        html += `
+          <div class="lb-item ${topClass} ${meClass} animate-in" style="animation-delay:${i * 0.05}s">
+            <div class="lb-rank">${medal}</div>
+            <div class="lb-name">${escapeHtml(p.name)}</div>
+            <div class="lb-score">${p.score}</div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function showPointsPopup(points) {
+      const el = document.createElement('div');
+      el.className = 'points-popup';
+      el.textContent = `+${points}`;
+      el.style.left = Math.random() * 60 + 20 + '%';
+      el.style.top = '50%';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 1500);
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    ws.onclose = () => {
+      setTimeout(() => location.reload(), 2000);
+    };
+
+    // Auto-focus
+    nameInput.focus();
+  </script>
+</body>
+</html>
